@@ -6,8 +6,31 @@ import deepmerge from "deepmerge";
 import { getRequestConfig } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 
+// Static imports for all locales to ensure they're bundled in standalone mode
+import frMessages from "../../locales/fr.json";
+import enMessages from "../../locales/en.json";
+import deMessages from "../../locales/de.json";
+import esMessages from "../../locales/es.json";
+import itMessages from "../../locales/it.json";
+import jaMessages from "../../locales/ja.json";
+import plMessages from "../../locales/pl.json";
+import ruMessages from "../../locales/ru.json";
+import zhMessages from "../../locales/zh.json";
+
+const localeMap: Record<string, Record<string, unknown>> = {
+  fr: frMessages,
+  en: enMessages,
+  de: deMessages,
+  es: esMessages,
+  it: itMessages,
+  ja: jaMessages,
+  pl: plMessages,
+  ru: ruMessages,
+  zh: zhMessages,
+};
+
 export default getRequestConfig(async () => {
-  const fallback = "en";
+  const fallback = "fr";
   const cookiesList = await cookies();
 
   let locale: string = fallback;
@@ -30,7 +53,7 @@ export default getRequestConfig(async () => {
     }
   }
 
-  const i18nOrganization = _headers.get("x-zitadel-i18n-organization") || ""; // You may need to set this header in middleware
+  const i18nOrganization = _headers.get("x-zitadel-i18n-organization") || "";
 
   let translations: JsonObject | {} = {};
   try {
@@ -48,16 +71,15 @@ export default getRequestConfig(async () => {
   }
 
   const customMessages = translations;
-  const localeMessages = (await import(`../../locales/${locale}.json`)).default;
-  const fallbackMessages = (await import(`../../locales/${fallback}.json`))
-    .default;
+  const localeMessages = localeMap[locale] || localeMap[fallback];
+  const fallbackMessages = localeMap[fallback];
 
   return {
     locale,
     messages: deepmerge.all([
+      customMessages,
       fallbackMessages,
       localeMessages,
-      customMessages,
     ]) as Record<string, string>,
   };
 });

@@ -70,26 +70,37 @@ export default async function Page(props: { searchParams: Promise<Record<string 
       </div>
 
       <div className="w-full">
-        <UsernameForm
-          loginName={loginName}
-          requestId={requestId}
-          organization={organization} // stick to "organization" as we still want to do user discovery based on the searchParams not the default organization, later the organization is determined by the found user
-          loginSettings={contextLoginSettings}
-          suffix={suffix}
-          submit={submit}
-          allowRegister={!!loginSettings?.allowRegister}
-        ></UsernameForm>
-
         {loginSettings?.allowExternalIdp && !!identityProviders?.length && (
-          <div className="w-full pb-4 pt-6">
+          <div className="w-full pb-2">
             <SignInWithIdp
               identityProviders={identityProviders}
               requestId={requestId}
               organization={organization}
               postErrorRedirectUrl="/loginname"
+              showLabel={false}
             ></SignInWithIdp>
           </div>
         )}
+
+        {loginSettings?.allowExternalIdp && !!identityProviders?.length && (
+          <div className="relative my-4 flex items-center">
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+            <span className="mx-4 flex-shrink text-sm text-gray-500 dark:text-gray-400">
+              <Translated i18nKey="orSignInWith" namespace="idp" />
+            </span>
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+        )}
+
+        <UsernameForm
+          loginName={loginName}
+          requestId={requestId}
+          organization={organization}
+          loginSettings={contextLoginSettings}
+          suffix={suffix}
+          submit={submit}
+          allowRegister={!!loginSettings?.allowRegister}
+        ></UsernameForm>
       </div>
     </DynamicTheme>
   );
