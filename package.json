@@ -17,7 +17,12 @@
   },
   "pnpm": {
     "overrides": {
-      "form-data@>=4.0.0 <4.0.4": ">=4.0.4"
+      "form-data@>=4.0.0 <4.0.4": ">=4.0.4",
+      "tar": ">=7.5.11",
+      "glob": ">=10.5.0",
+      "minimatch": ">=9.0.7",
+      "picomatch": ">=4.0.4",
+      "brace-expansion": ">=2.0.3"
     }
   },
   "git": {
@@ -36,13 +41,13 @@
     "deepmerge": "^4.3.1",
     "lucide-react": "0.469.0",
     "moment": "^2.29.4",
-    "next": "15.4.0-canary.86",
-    "next-intl": "^3.25.1",
+    "next": "15.6.0-canary.61",
+    "next-intl": "^4.9.0",
     "next-themes": "^0.2.1",
     "nice-grpc": "2.0.1",
     "qrcode.react": "^3.1.0",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "19.1.5",
+    "react-dom": "19.1.5",
     "react-hook-form": "7.39.5",
     "tinycolor2": "1.4.2",
     "uuid": "^11.1.0"
@@ -75,7 +80,7 @@
     "dotenv-cli": "^8.0.0",
     "env-cmd": "^10.1.0",
     "eslint": "^8.57.0",
-    "eslint-config-next": "15.4.0-canary.86",
+    "eslint-config-next": "15.6.0-canary.61",
     "eslint-config-prettier": "^9.1.0",
     "gaxios": "^7.1.0",
     "grpc-tools": "1.13.0",

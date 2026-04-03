@@ -38,7 +38,6 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     dynamicIO: true,
-    // Add React 19 compatibility optimizations
     optimizePackageImports: ['@radix-ui/react-tooltip', '@heroicons/react'],
   },
   eslint: {

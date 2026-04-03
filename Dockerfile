@@ -20,7 +20,8 @@ RUN pnpm run build
 FROM node:22-alpine
 WORKDIR /app
 
-RUN addgroup --system --gid 1001 nodejs && \
+RUN apk upgrade --no-cache && \
+    addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # If /.env-file/.env is mounted into the container, its variables are made available to the server before it starts up.
