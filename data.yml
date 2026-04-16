@@ -1,0 +1,82 @@
+schema_version: 1
+kind: app
+
+app:
+  name: zitadel-login
+  description: >-
+    Interface de connexion Zitadel personnalisée aux couleurs DSI (branding,
+    traductions françaises, pages d'onboarding). Next.js standalone servant
+    les écrans d'authentification OIDC ; ne stocke pas de données d'identité
+    — celles-ci résident dans Zitadel Core.
+  type: frontend
+  erp_relationship: standalone
+  owner_team: DSI — Infrastructure / Identité
+  repo: https://gitlab.inclusiveit.fr/dsi/zitadel-login
+  status: production
+  stack:
+    language: TypeScript
+    framework: Next.js 15 (standalone) + React
+    database: none
+    runtime: Kubernetes (conteneur Node)
+  links:
+    docs: https://zitadel.com/docs
+    runbook: null
+
+# Aucun data_processed : ce dépôt ne possède pas de base de données
+# et ne persiste aucune donnée personnelle. Les comptes utilisateurs,
+# sessions et tokens sont gérés par Zitadel Core (service tiers ci-dessous).
+# Les données transitoires (état de la requête OIDC en cours) sont conservées
+# uniquement dans des cookies signés côté navigateur pendant la durée du flux
+# d'authentification.
+
+third_parties:
+  - id: zitadel-core
+    name: Zitadel Core (auth.dsi-hub.net)
+    purpose: >-
+      Moteur d'authentification OIDC / SAML. Ce dépôt n'est que l'UI
+      personnalisée du flux de connexion ; Zitadel Core gère les comptes,
+      mots de passe hachés, facteurs MFA, sessions et tokens.
+    data_shared: [identification, contact, connexion]
+    sdk_or_lib: "@zitadel/client + HTTP direct"
+    region: eu
+    region_note: Auto-hébergé sur le cluster K8s (auth.dsi-hub.net).
+    is_subprocessor: false
+
+  - id: microsoft-365
+    name: Microsoft 365 / Azure AD
+    purpose: >-
+      Fournisseur d'identité fédéré configuré dans Zitadel Core — les
+      utilisateurs s'authentifient avec leur compte Microsoft 365. Ce
+      dépôt ne contacte pas directement Microsoft ; la fédération est
+      effectuée par Zitadel Core.
+    data_shared: [identification, contact, connexion]
+    sdk_or_lib: "Via Zitadel Core (pas d'appel direct)"
+    region: eu
+    region_note: >-
+      Tenant Microsoft 365 à confirmer. Microsoft peut transférer des
+      métadonnées vers les États-Unis au titre de l'addendum DPCP.
+    is_subprocessor: true
+
+env_vars:
+  - { name: ZITADEL_API_URL,          purpose: "URL de l'API Zitadel Core utilisée par le login Next.js", sensitive: false }
+  - { name: ZITADEL_SERVICE_USER_TOKEN, purpose: "PAT d'un Service User Zitadel pour les appels côté serveur", sensitive: true }
+  - { name: NEXT_PUBLIC_BASE_PATH,    purpose: "Chemin de base public pour Next.js (selon l'ingress)", sensitive: false }
+  - { name: NEXT_PUBLIC_DEFAULT_CSP,  purpose: "Politique CSP publique", sensitive: false }
+  - { name: NEXT_PUBLIC_ORG_CUSTOMER_ROUTE, purpose: "Route optionnelle pour l'organisation client", sensitive: false }
+  - { name: SYSTEM_USER_ID,           purpose: "ID de service utilisé par Zitadel Core", sensitive: false }
+  - { name: SYSTEM_USER_PRIVATE_KEY,  purpose: "Clé privée associée au service user Zitadel", sensitive: true }
+  - { name: HOSTNAME,                 purpose: "Hostname d'écoute du serveur Next.js", sensitive: false }
+  - { name: PORT,                     purpose: "Port d'écoute", sensitive: false }
+  - { name: EMAIL_VERIFICATION,       purpose: "Active la vérification email à l'inscription", sensitive: false }
+
+transfers_outside_eu: unknown
+transfers_detail: >-
+  Dépend de la résidence du tenant Microsoft 365 connecté à Zitadel Core.
+  Ce dépôt n'effectue pas de transfert directement mais fait transiter
+  l'utilisateur via Microsoft lors de la fédération.
+
+dpia_likely_needed: false
+dpia_note: >-
+  AIPD probablement non nécessaire pour ce dépôt seul : il n'est qu'une
+  interface et ne persiste aucune donnée. L'AIPD (si requise) porte sur
+  Zitadel Core, pas sur cette UI. À confirmer DPO.

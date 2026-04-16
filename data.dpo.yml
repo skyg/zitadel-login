@@ -1,0 +1,29 @@
+schema_version: 1
+kind: app
+
+managed_by: developer-seed
+do_not_edit: false
+
+decisions: []
+third_party_dpa: []
+
+transfers_validation:
+  status: none
+
+dpia:
+  status: pending
+
+app_validation:
+  dpo_validated: false
+  dpo_validated_at: null
+  dpo_validated_by: null
+  next_review_at: null
+  blocking_issues: []
+
+meta:
+  last_scanned: null
+  scan_status: not_found
+  last_bot_push: null
+  bot_identity: null
+  schema_version_at_last_decision: null
+  data_yml_content_hash: null
