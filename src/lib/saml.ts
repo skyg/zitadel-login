@@ -168,9 +168,27 @@ export async function loginWithSAMLAndSession({
             params.append("organization", selectedSession.factors?.user?.organizationId);
           }
           return { redirect: signedinUrl + "?" + params.toString() };
-        } else {
-          return { error: "Unknown error occurred" };
         }
+
+        // Surface meaningful messages instead of "Unknown error occurred".
+        // Pass the ConnectError's rawMessage as a plain string — a class instance
+        // would trip Next.js' Server→Client serialization check.
+        if (error && typeof error === "object" && "code" in error) {
+          const rawMessage = (error as { rawMessage?: string }).rawMessage ?? "";
+          if (error.code === 7 && rawMessage.includes("GrantRequired")) {
+            return {
+              error:
+                "You don't have access to this application. Please ask your administrator to grant you access.",
+            };
+          }
+          if (rawMessage) {
+            return { error: rawMessage };
+          }
+        }
+        if (error instanceof Error && error.message) {
+          return { error: error.message };
+        }
+        return { error: "Unknown error occurred" };
       }
     }
   }

@@ -101,9 +101,29 @@ export async function loginWithOIDCAndSession({
           }
           console.log("Redirecting to signed-in page:", signedinUrl + "?" + params.toString());
           return { redirect: signedinUrl + "?" + params.toString() };
-        } else {
-          return { error: "Unknown error occurred" };
         }
+
+        // Surface meaningful messages instead of "Unknown error occurred".
+        // Zitadel's ConnectError carries a stable rawMessage like
+        // "Errors.User.GrantRequired (OIDC-foSyH49RvL)" — pass that through as a
+        // plain string (a class instance would trip Next.js' Server→Client
+        // serialization check and crash the error boundary).
+        if (error && typeof error === "object" && "code" in error) {
+          const rawMessage = (error as { rawMessage?: string }).rawMessage ?? "";
+          if (error.code === 7 && rawMessage.includes("GrantRequired")) {
+            return {
+              error:
+                "You don't have access to this application. Please ask your administrator to grant you access.",
+            };
+          }
+          if (rawMessage) {
+            return { error: rawMessage };
+          }
+        }
+        if (error instanceof Error && error.message) {
+          return { error: error.message };
+        }
+        return { error: "Unknown error occurred" };
       }
     }
   }
