@@ -431,5 +431,20 @@
     "sessionExpired": "当前会话已过期，请重新登录。",
     "failedLoading": "加载数据失败，请再试一次。",
     "tryagain": "重试"
+  },
+  "chooser": {
+    "title": "Sign in",
+    "subtitle": "Choose how to sign in.",
+    "dsiEmployee": {
+      "title": "DSI Employee",
+      "subtitle": "Sign in with your Microsoft 365 account",
+      "cta": "Continue with Microsoft 365"
+    },
+    "external": {
+      "title": "External user",
+      "subtitle": "Sign in with email and password",
+      "cta": "Continue with password"
+    },
+    "backToChooser": "Choose another method"
   }
 }

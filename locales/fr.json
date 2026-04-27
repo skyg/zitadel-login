@@ -431,5 +431,20 @@
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
     "failedLoading": "Échec du chargement des données. Veuillez réessayer.",
     "tryagain": "Réessayer"
+  },
+  "chooser": {
+    "title": "Connexion",
+    "subtitle": "Choisissez votre méthode de connexion.",
+    "dsiEmployee": {
+      "title": "Salarié DSI",
+      "subtitle": "Connexion avec votre compte Microsoft 365",
+      "cta": "Continuer avec Microsoft 365"
+    },
+    "external": {
+      "title": "Utilisateur externe",
+      "subtitle": "Connexion par e-mail et mot de passe",
+      "cta": "Continuer avec un mot de passe"
+    },
+    "backToChooser": "Choisir une autre méthode"
   }
 }

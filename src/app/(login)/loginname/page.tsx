@@ -8,6 +8,7 @@ import { Organization } from "@zitadel/proto/zitadel/org/v2/org_pb";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("loginname");
@@ -22,6 +23,9 @@ export default async function Page(props: { searchParams: Promise<Record<string 
   const organization = searchParams?.organization;
   const suffix = searchParams?.suffix;
   const submit: boolean = searchParams?.submit === "true";
+  // When the chooser at "/" sent the user here for username + password sign-in,
+  // hide the IdP buttons so they aren't tempted by them again.
+  const external = searchParams?.external === "1";
 
   const _headers = await headers();
   const { serviceUrl } = getServiceUrlFromHeaders(_headers);
@@ -70,7 +74,7 @@ export default async function Page(props: { searchParams: Promise<Record<string 
       </div>
 
       <div className="w-full">
-        {loginSettings?.allowExternalIdp && !!identityProviders?.length && (
+        {!external && loginSettings?.allowExternalIdp && !!identityProviders?.length && (
           <div className="w-full pb-2">
             <SignInWithIdp
               identityProviders={identityProviders}
@@ -82,7 +86,7 @@ export default async function Page(props: { searchParams: Promise<Record<string 
           </div>
         )}
 
-        {loginSettings?.allowExternalIdp && !!identityProviders?.length && (
+        {!external && loginSettings?.allowExternalIdp && !!identityProviders?.length && (
           <div className="relative my-4 flex items-center">
             <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
             <span className="mx-4 flex-shrink text-sm text-gray-500 dark:text-gray-400">
@@ -101,6 +105,22 @@ export default async function Page(props: { searchParams: Promise<Record<string 
           submit={submit}
           allowRegister={!!loginSettings?.allowRegister}
         ></UsernameForm>
+
+        {external && (
+          <div className="mt-6 text-center text-sm">
+            <Link
+              href={(() => {
+                const params = new URLSearchParams();
+                if (requestId) params.append("requestId", requestId);
+                if (organization) params.append("organization", organization);
+                return params.toString() ? `/?${params.toString()}` : "/";
+              })()}
+              className="text-primary-light-500 hover:underline dark:text-primary-dark-500"
+            >
+              <Translated i18nKey="backToChooser" namespace="chooser" />
+            </Link>
+          </div>
+        )}
       </div>
     </DynamicTheme>
   );

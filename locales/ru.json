@@ -431,5 +431,20 @@
     "sessionExpired": "Ваша сессия истекла. Войдите снова.",
     "failedLoading": "Ошибка загрузки данных. Попробуйте ещё раз.",
     "tryagain": "Попробовать снова"
+  },
+  "chooser": {
+    "title": "Sign in",
+    "subtitle": "Choose how to sign in.",
+    "dsiEmployee": {
+      "title": "DSI Employee",
+      "subtitle": "Sign in with your Microsoft 365 account",
+      "cta": "Continue with Microsoft 365"
+    },
+    "external": {
+      "title": "External user",
+      "subtitle": "Sign in with email and password",
+      "cta": "Continue with password"
+    },
+    "backToChooser": "Choose another method"
   }
 }
