@@ -46,22 +46,28 @@ export default async function Page(props: {
   const primaryIdp = identityProviders.find((p) => p.type === IdentityProviderType.AZURE_AD) ?? identityProviders[0];
 
   // No IdP configured → chooser has nothing to choose. Fall back to the
-  // username form directly.
+  // username form directly. external=1 so /loginname doesn't bounce us back.
   if (!primaryIdp) {
     const params = new URLSearchParams();
     if (requestId) params.append("requestId", requestId);
     if (organization) params.append("organization", organization);
-    redirect(`/loginname${params.toString() ? `?${params.toString()}` : ""}`);
+    params.append("external", "1");
+    redirect(`/loginname?${params.toString()}`);
   }
 
+  // Forward everything the app or Zitadel passed through (loginName hint,
+  // suffix, submit, …) plus external=1 so /loginname doesn't bounce back here.
   const externalParams = new URLSearchParams();
-  if (requestId) externalParams.append("requestId", requestId);
-  if (organization) externalParams.append("organization", organization);
+  for (const [k, v] of Object.entries(searchParams)) {
+    if (typeof v === "string" && v && k !== "external") {
+      externalParams.append(k, v);
+    }
+  }
   externalParams.append("external", "1");
   const externalHref = `/loginname?${externalParams.toString()}`;
 
   return (
-    <DynamicTheme branding={branding}>
+    <DynamicTheme branding={branding} variant="wide">
       <div className="flex flex-col space-y-4">
         <h1>
           <Translated i18nKey="title" namespace="chooser" />

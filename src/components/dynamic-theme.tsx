@@ -22,9 +22,11 @@ import { useResponsiveLayout } from "@/lib/theme-hooks";
 export function DynamicTheme({
   branding,
   children,
+  variant = "default",
 }: {
   children: ReactNode | ((isSideBySide: boolean) => ReactNode);
   branding?: BrandingSettings;
+  variant?: "default" | "wide";
 }) {
   const { isSideBySide } = useResponsiveLayout();
 
@@ -95,8 +97,10 @@ export function DynamicTheme({
             const formContent = childArray[1] || null;
             const hasMultipleChildren = childArray.length > 1;
 
+            const wrapperWidthClass = variant === "wide" ? "max-w-[640px]" : "max-w-[440px]";
+
             return (
-              <div className="relative mx-auto w-full max-w-[440px] py-4 px-4">
+              <div className={`relative mx-auto w-full ${wrapperWidthClass} py-4 px-4`}>
                 <Card>
                   <div className="mx-auto flex flex-col items-center space-y-8">
                     <div className="relative flex flex-row items-center justify-center -mb-4">
