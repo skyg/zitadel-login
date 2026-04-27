@@ -40,7 +40,7 @@ export function LoginMethodChooser({
             className="group flex h-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-primary-light-500 bg-primary-light-50 p-8 text-center outline-none transition-all hover:shadow-lg disabled:opacity-50 dark:border-primary-dark-500 dark:bg-primary-dark-900 dark:hover:bg-white/5"
           >
             <Image
-              src="/dsi-logo.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/dsi-logo.png`}
               alt="DSI Inclusion"
               width={120}
               height={82}
