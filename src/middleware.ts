@@ -39,6 +39,21 @@ async function loadSecuritySettings(
 }
 
 export async function middleware(request: NextRequest) {
+  // Force the login chooser as the entry point: apps and Zitadel core deep-link
+  // to /loginname for OIDC requests, but DSI employees keep typing into the
+  // email field. Redirect /loginname → / unless the chooser sent the user back
+  // here with ?external=1. Done in middleware so the redirect actually runs
+  // before any rendering — `redirect()` from a Server Component gets swallowed
+  // by PPR's static shell when `experimental.dynamicIO` is on.
+  if (
+    request.nextUrl.pathname === "/loginname" &&
+    request.nextUrl.searchParams.get("external") !== "1"
+  ) {
+    const target = request.nextUrl.clone();
+    target.pathname = "/";
+    return NextResponse.redirect(target);
+  }
+
   // Add the original URL as a header to all requests
   const requestHeaders = new Headers(request.headers);
 

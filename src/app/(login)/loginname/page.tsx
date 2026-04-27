@@ -9,12 +9,6 @@ import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-
-// We redirect to "/" when ?external=1 is missing. With Next.js Partial
-// Prerendering the static shell would be sent with status 200 before our
-// redirect can run, swallowing it.
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("loginname");
@@ -29,20 +23,11 @@ export default async function Page(props: { searchParams: Promise<Record<string 
   const organization = searchParams?.organization;
   const suffix = searchParams?.suffix;
   const submit: boolean = searchParams?.submit === "true";
-  // When the chooser at "/" sent the user here for username + password sign-in,
-  // hide the IdP buttons so they aren't tempted by them again.
+  // The chooser at / forwards the user here with external=1 so we can hide the
+  // IdP buttons (and middleware short-circuits direct hits without it). When
+  // we still see external missing — e.g. someone followed an old bookmark —
+  // we treat it as "form anyway" rather than crashing.
   const external = searchParams?.external === "1";
-
-  // Apps deep-link to /loginname directly; route them through the chooser
-  // first so DSI employees don't accidentally type into the email field.
-  // The chooser sends back here with external=1 for the username path.
-  if (!external) {
-    const params = new URLSearchParams();
-    for (const [k, v] of Object.entries(searchParams)) {
-      if (typeof v === "string" && v) params.append(k, v);
-    }
-    redirect(params.toString() ? `/?${params.toString()}` : "/");
-  }
 
   const _headers = await headers();
   const { serviceUrl } = getServiceUrlFromHeaders(_headers);
