@@ -37,18 +37,18 @@ export function LoginMethodChooser({
             type="submit"
             disabled={isPending}
             data-testid="chooser-dsi-employee"
-            className="group flex h-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-primary-light-500 bg-primary-light-50 p-8 text-center outline-none transition-all hover:shadow-lg disabled:opacity-50 dark:border-primary-dark-500 dark:bg-primary-dark-900 dark:hover:bg-white/5"
+            className="group flex h-full min-h-[200px] flex-col items-center justify-center gap-5 rounded-2xl border border-divider-light bg-white p-8 text-center outline-none transition-all hover:border-black hover:shadow-xl disabled:opacity-50 dark:border-divider-dark dark:bg-background-dark-400 dark:hover:border-white dark:hover:bg-background-dark-500"
           >
             <Image
               src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/dsi-logo.png`}
               alt="DSI Inclusion"
               width={120}
               height={82}
-              className="h-12 w-auto"
+              className="h-14 w-auto"
               priority
               unoptimized
             />
-            <span className="text-lg font-semibold">
+            <span className="text-lg font-semibold tracking-tight">
               <Translated i18nKey="dsiEmployee.title" namespace="chooser" />
             </span>
           </button>
@@ -57,10 +57,10 @@ export function LoginMethodChooser({
         <Link
           href={externalHref}
           data-testid="chooser-external"
-          className="group flex h-full flex-col items-center justify-center gap-4 rounded-xl border border-divider-light bg-background-light-400 p-8 text-center outline-none transition-all hover:shadow-lg dark:border-divider-dark dark:bg-background-dark-400 dark:hover:bg-white/5"
+          className="group flex h-full min-h-[200px] flex-col items-center justify-center gap-5 rounded-2xl border border-divider-light bg-white p-8 text-center outline-none transition-all hover:border-black hover:shadow-xl dark:border-divider-dark dark:bg-background-dark-400 dark:hover:border-white dark:hover:bg-background-dark-500"
         >
-          <KeyIcon className="h-12 w-12 text-text-light-500 dark:text-text-dark-500" aria-hidden="true" />
-          <span className="text-lg font-semibold">
+          <KeyIcon className="h-14 w-14 text-text-light-500 dark:text-text-dark-500" aria-hidden="true" />
+          <span className="text-lg font-semibold tracking-tight">
             <Translated i18nKey="external.title" namespace="chooser" />
           </span>
         </Link>
