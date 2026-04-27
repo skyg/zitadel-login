@@ -10,6 +10,10 @@ import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+// Same reason as /loginname: the no-IdP fallback uses redirect(), which would
+// be swallowed by PPR's static shell otherwise.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("chooser");
   return { title: t("title") };

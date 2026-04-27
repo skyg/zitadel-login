@@ -11,6 +11,11 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+// We redirect to "/" when ?external=1 is missing. With Next.js Partial
+// Prerendering the static shell would be sent with status 200 before our
+// redirect can run, swallowing it.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("loginname");
   return { title: t("title") };

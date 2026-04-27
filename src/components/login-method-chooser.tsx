@@ -46,6 +46,7 @@ export function LoginMethodChooser({
               height={82}
               className="h-12 w-auto"
               priority
+              unoptimized
             />
             <span className="text-lg font-semibold">
               <Translated i18nKey="dsiEmployee.title" namespace="chooser" />
