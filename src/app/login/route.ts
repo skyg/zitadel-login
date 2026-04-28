@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 // existed. We surface that as a redirect rather than a 400 — see comment below.
 const CONNECT_NOT_FOUND = 5;
 
-function redirectToChooser(request: NextRequest, reason?: string): NextResponse {
+function redirectToChooser(_request: NextRequest, reason?: string): NextResponse {
   // Stale browser tabs and external apps polling /login with an expired
   // authRequest are the dominant 4xx generators on this hostname. Returning
   // 400/500 means CrowdSec eventually trips http-bf / http-probing on
@@ -19,10 +19,17 @@ function redirectToChooser(request: NextRequest, reason?: string): NextResponse 
   // them to the chooser instead — they'll start a fresh OIDC request from
   // there. The `reason` query param is purely a log signal; the chooser does
   // not render anything from it today.
-  const target = request.nextUrl.clone();
-  target.pathname = "/";
-  target.search = reason ? `?error=${encodeURIComponent(reason)}` : "";
-  return NextResponse.redirect(target);
+  //
+  // We build a relative Location header rather than calling
+  // NextResponse.redirect(): from a route handler, that helper resolves the
+  // URL against the pod's listen address ([::]:3000) instead of the
+  // user-facing host. A leading-slash Location is resolved by the browser
+  // against the actual origin and works through Traefik unchanged.
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  const location = reason
+    ? `${basePath}/?error=${encodeURIComponent(reason)}`
+    : `${basePath}/`;
+  return new NextResponse(null, { status: 307, headers: { location } });
 }
 
 function isConnectNotFound(error: unknown): boolean {
