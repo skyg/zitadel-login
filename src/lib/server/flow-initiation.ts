@@ -13,7 +13,11 @@ import {
 import { sendLoginname, SendLoginnameCommand } from "@/lib/server/loginname";
 import { idpTypeToSlug } from "@/lib/idp";
 import { create } from "@zitadel/client";
-import { Prompt } from "@zitadel/proto/zitadel/oidc/v2/authorization_pb";
+import {
+  AuthorizationErrorSchema,
+  ErrorReason,
+  Prompt,
+} from "@zitadel/proto/zitadel/oidc/v2/authorization_pb";
 import { CreateCallbackRequestSchema, SessionSchema } from "@zitadel/proto/zitadel/oidc/v2/oidc_service_pb";
 import { CreateResponseRequestSchema } from "@zitadel/proto/zitadel/saml/v2/saml_service_pb";
 import { Session } from "@zitadel/proto/zitadel/session/v2/session_pb";
@@ -225,25 +229,48 @@ export async function handleOIDCFlowInitiation(params: FlowInitiationParams): Pr
         authRequest,
       });
 
-      const noSessionResponse = NextResponse.json({ error: "No active session found" }, { status: 400 });
+      const applyIframeCsp = (response: NextResponse): NextResponse => {
+        if (securitySettings?.embeddedIframe?.enabled) {
+          response.headers.set(
+            "Content-Security-Policy",
+            `${DEFAULT_CSP} frame-ancestors ${securitySettings.embeddedIframe.allowedOrigins.join(" ")};`,
+          );
+          response.headers.delete("X-Frame-Options");
+        }
+        return response;
+      };
 
-      if (securitySettings?.embeddedIframe?.enabled) {
-        securitySettings.embeddedIframe.allowedOrigins;
-        noSessionResponse.headers.set(
-          "Content-Security-Policy",
-          `${DEFAULT_CSP} frame-ancestors ${securitySettings.embeddedIframe.allowedOrigins.join(" ")};`,
-        );
-        noSessionResponse.headers.delete("X-Frame-Options");
-      }
+      // OIDC prompt=none semantics: when we cannot satisfy the silent auth
+      // request, we MUST send the user (i.e. the iframe) back to the RP's
+      // redirect_uri with error=login_required, NOT return a 400. Returning
+      // a JSON 400 here traps RP libraries (oidc-client-ts in particular)
+      // in their default infinite silent-renew retry loop, which generated
+      // the steady ~235 req/h cascade we tracked.
+      const buildLoginRequiredCallback = async (): Promise<NextResponse> => {
+        const { callbackUrl } = await createCallback({
+          serviceUrl,
+          req: create(CreateCallbackRequestSchema, {
+            authRequestId: requestId.replace("oidc_", ""),
+            callbackKind: {
+              case: "error",
+              value: create(AuthorizationErrorSchema, {
+                error: ErrorReason.LOGIN_REQUIRED,
+                errorDescription: "No active session for prompt=none",
+              }),
+            },
+          }),
+        });
+        return applyIframeCsp(NextResponse.redirect(callbackUrl));
+      };
 
       if (!selectedSession || !selectedSession.id) {
-        return noSessionResponse;
+        return await buildLoginRequiredCallback();
       }
 
       const cookie = sessionCookies.find((cookie) => cookie.id === selectedSession.id);
 
       if (!cookie || !cookie.id || !cookie.token) {
-        return noSessionResponse;
+        return await buildLoginRequiredCallback();
       }
 
       const session = {
@@ -262,18 +289,7 @@ export async function handleOIDCFlowInitiation(params: FlowInitiationParams): Pr
         }),
       });
 
-      const callbackResponse = NextResponse.redirect(callbackUrl);
-
-      if (securitySettings?.embeddedIframe?.enabled) {
-        securitySettings.embeddedIframe.allowedOrigins;
-        callbackResponse.headers.set(
-          "Content-Security-Policy",
-          `${DEFAULT_CSP} frame-ancestors ${securitySettings.embeddedIframe.allowedOrigins.join(" ")};`,
-        );
-        callbackResponse.headers.delete("X-Frame-Options");
-      }
-
-      return callbackResponse;
+      return applyIframeCsp(NextResponse.redirect(callbackUrl));
     } else {
       let selectedSession = await findValidSession({
         serviceUrl,
